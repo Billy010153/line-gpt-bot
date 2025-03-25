@@ -10,6 +10,17 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 LINE_ACCESS_TOKEN = os.environ.get("LINE_ACCESS_TOKEN")
 LINE_REPLY_URL = "https://api.line.me/v2/bot/message/reply"
 
+# 讀取個人資料
+def load_user_profile():
+    try:
+        with open("user_profile.txt", "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            return "\n".join(lines)
+    except:
+        return ""
+
+USER_PROFILE = load_user_profile()
+
 def process_event(event):
     try:
         if event["type"] == "message" and event["message"]["type"] == "text":
@@ -18,25 +29,36 @@ def process_event(event):
             if not reply_token:
                 print("❌ 無效的 replyToken")
                 return
-            print("✅ GPT 收到問題：", user_message)
+
+            # 使用個人資料作為系統 prompt
+            system_prompt = f"""你是一位叫「小X」的台灣人。請根據以下真實生活背景，代替本人用第一人稱親切地回答別人的問題。
+
+{USER_PROFILE}
+
+請用自然語氣回應以下問題："""
+
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "你是一位親切的 AI 助手"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message}
                 ]
             )
             reply_message = response.choices[0].message.content.strip()
+
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {LINE_ACCESS_TOKEN}"
             }
+
             payload = {
                 "replyToken": reply_token,
                 "messages": [{"type": "text", "text": reply_message}]
             }
+
             r = requests.post(LINE_REPLY_URL, headers=headers, json=payload)
             print("📤 傳送至 LINE 狀態：", r.status_code)
+
     except Exception as e:
         print("❌ 錯誤：", str(e))
 
@@ -51,7 +73,7 @@ def callback():
 
 @app.route("/")
 def index():
-    return "LINE GPT Bot is running!"
+    return "我是本人 LINE Bot 已上線！"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

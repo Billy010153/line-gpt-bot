@@ -60,3 +60,6 @@ def callback():
             threading.Thread(target=process_event, args=(event,)).start()
 
     return jsonify({"status": "ok"})  # ✅ 立刻回應 LINE
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

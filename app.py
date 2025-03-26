@@ -31,7 +31,7 @@ def process_event(event):
                 return
 
             # 使用個人資料作為系統 prompt
-            system_prompt = f"""你是一位叫「自樂」的台灣人。請根據以下真實生活背景，代替本人用第一人稱簡單且輕鬆愉快地回答別人的問題。
+            system_prompt = f"""你是一位叫「自樂」的台灣人。請根據以下真實生活背景，代替本人用第一人稱簡單且輕鬆幽默地回答別人的問題。
 
 {USER_PROFILE}
 

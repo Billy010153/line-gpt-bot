@@ -60,7 +60,7 @@ def process_event(event):
 
             # 呼叫 OpenAI API 取得回應
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=history
             )
             reply_message = response.choices[0].message.content.strip()
